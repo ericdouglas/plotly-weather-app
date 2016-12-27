@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { connect } from 'react-redux';
 
 import * as CONST from './constants';
@@ -7,9 +6,7 @@ import {
   changeLocation,
   setSelectedTemp,
   setSelectedDate,
-  setData,
-  setDates,
-  setTemps
+  fetchData
 } from './actions';
 
 import Plot from './components/Plot';
@@ -40,26 +37,7 @@ class App extends Component {
     const location = encodeURIComponent(this.props.location);
     const URL      = CONST.URL_PREFIX + location + CONST.URL_SUFFIX;
 
-    axios
-      .get(URL)
-      .then(response => {
-        const data  = response.data;
-        const list  = data.list;
-        const dates = [];
-        const temps = [];
-
-        list
-          .forEach(item => {
-            dates.push(item.dt_txt);
-            temps.push(item.main.temp);
-          });
-
-        this.props.dispatch(setData(data));
-        this.props.dispatch(setDates(dates));
-        this.props.dispatch(setTemps(temps));
-        this.props.dispatch(setSelectedTemp(null));
-        this.props.dispatch(setSelectedDate(''));
-      });
+    this.props.dispatch(fetchData(URL));
   }
 
   onPlotClick(data) {
