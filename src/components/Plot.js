@@ -17,14 +17,21 @@ class Plot extends React.Component {
     this._drawPlot();
   }
 
+  shouldComponentUpdate(nextProps) {
+    const xDataChanged = !this.props.xData.equals(nextProps.xData);
+    const yDataChanged = !this.props.yData.equals(nextProps.yData);
+
+    return xDataChanged || yDataChanged;
+  }
+
   ////////// Private Methods
   _drawPlot() {
     const { xData, yData, type, onPlotClick } = this.props;
 
     Plotly
     .newPlot('plot', [{
-      x: xData,
-      y: yData,
+      x: xData.toJS(),
+      y: yData.toJS(),
       type
     }], {
       margin: {

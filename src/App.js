@@ -34,7 +34,7 @@ class App extends Component {
   fetchData(evt) {
     evt.preventDefault();
 
-    const location = encodeURIComponent(this.props.location);
+    const location = encodeURIComponent(this.props.redux.get('location'));
     const URL      = CONST.URL_PREFIX + location + CONST.URL_SUFFIX;
 
     this.props.dispatch(fetchData(URL));
@@ -51,11 +51,12 @@ class App extends Component {
 
   ////////// Private Methods
   _renderForecastInfo(list) {
-    let currentTemp      = 'not loaded yet';
-    const { temp, date } = this.props.selected;
+    let currentTemp = 'not loaded yet';
+    const temp      = this.props.redux.getIn(['selected', 'temp']);
+    const date      = this.props.redux.getIn(['selected', 'date']);
 
     if (list) {
-      currentTemp = list[0].main.temp;
+      currentTemp = list.getIn(['0', 'main', 'temp']);
 
       return (
         <div className="wrapper">
@@ -72,8 +73,8 @@ class App extends Component {
           <h2>Forecast</h2>
 
           <Plot
-            xData={this.props.dates}
-            yData={this.props.temps}
+            xData={this.props.redux.get('dates')}
+            yData={this.props.redux.get('temps')}
             onPlotClick={this.onPlotClick}
             type="scatter"
           />
@@ -99,7 +100,7 @@ class App extends Component {
           </label>
         </form>
 
-        {this._renderForecastInfo(this.props.data.list)}
+        {this._renderForecastInfo(this.props.redux.getIn(['data', 'list']))}
       </div>
     );
   }
@@ -107,11 +108,7 @@ class App extends Component {
 
 function mapStateProps(state) {
   return {
-    data: state.data,
-    location: state.location,
-    selected: state.selected,
-    dates: state.dates,
-    temps: state.temps
+    redux: state
   };
 }
 
