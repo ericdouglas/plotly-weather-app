@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { connect } from 'react-redux';
 
 import * as CONST from './constants';
+import {
+  changeLocation,
+  setSelectedTemp,
+  setSelectedDate,
+  setData,
+  setDates,
+  setTemps
+} from './actions';
 
 import Plot from './components/Plot';
 
@@ -10,17 +19,6 @@ import './App.css';
 class App extends Component {
   constructor() {
     super();
-
-    this.state = {
-      location: '',
-      data: {},
-      dates: [],
-      temps: [],
-      selected: {
-        date: '',
-        temp: null
-      }
-    }
 
     ////////// Callbacks
     this.changeLocation = this.changeLocation.bind(this);
@@ -33,15 +31,13 @@ class App extends Component {
 
   ////////// Callbacks
   changeLocation(evt) {
-    this.setState({
-      location: evt.target.value
-    });
+    this.props.dispatch(changeLocation(evt.target.value));
   }
 
   fetchData(evt) {
     evt.preventDefault();
 
-    const location = encodeURIComponent(this.state.location);
+    const location = encodeURIComponent(this.props.location);
     const URL      = CONST.URL_PREFIX + location + CONST.URL_SUFFIX;
 
     axios
@@ -58,33 +54,27 @@ class App extends Component {
             temps.push(item.main.temp);
           });
 
-        this.setState({
-          data,
-          dates,
-          temps,
-          selected: {
-            date: '',
-            temp: null
-          }
-        });
+        this.props.dispatch(setData(data));
+        this.props.dispatch(setDates(dates));
+        this.props.dispatch(setTemps(temps));
+        this.props.dispatch(setSelectedTemp(null));
+        this.props.dispatch(setSelectedDate(''));
       });
   }
 
   onPlotClick(data) {
     if (data.points) {
-      this.setState({
-        selected: {
-          date: data.points[0].x,
-          temp: data.points[0].y
-        }
-      });
+      // const number = data.points[0].pointNumber;
+
+      this.props.dispatch(setSelectedTemp(data.points[0].y));
+      this.props.dispatch(setSelectedDate(data.points[0].x));
     }
   }
 
   ////////// Private Methods
   _renderForecastInfo(list) {
     let currentTemp      = 'not loaded yet';
-    const { temp, date } = this.state.selected;
+    const { temp, date } = this.props.selected;
 
     if (list) {
       currentTemp = list[0].main.temp;
@@ -104,8 +94,8 @@ class App extends Component {
           <h2>Forecast</h2>
 
           <Plot
-            xData={this.state.dates}
-            yData={this.state.temps}
+            xData={this.props.dates}
+            yData={this.props.temps}
             onPlotClick={this.onPlotClick}
             type="scatter"
           />
@@ -131,10 +121,20 @@ class App extends Component {
           </label>
         </form>
 
-        {this._renderForecastInfo(this.state.data.list)}
+        {this._renderForecastInfo(this.props.data.list)}
       </div>
     );
   }
 }
 
-export default App;
+function mapStateProps(state) {
+  return {
+    data: state.data,
+    location: state.location,
+    selected: state.selected,
+    dates: state.dates,
+    temps: state.temps
+  };
+}
+
+export default connect(mapStateProps)(App);
