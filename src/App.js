@@ -15,12 +15,17 @@ class App extends Component {
       location: '',
       data: {},
       dates: [],
-      temps: []
+      temps: [],
+      selected: {
+        date: '',
+        temp: null
+      }
     }
 
     ////////// Callbacks
     this.changeLocation = this.changeLocation.bind(this);
     this.fetchData      = this.fetchData.bind(this);
+    this.onPlotClick    = this.onPlotClick.bind(this);
 
     ////////// Private Methods
     this._renderForecastInfo = this._renderForecastInfo.bind(this);
@@ -56,14 +61,30 @@ class App extends Component {
         this.setState({
           data,
           dates,
-          temps
+          temps,
+          selected: {
+            date: '',
+            temp: null
+          }
         });
       });
   }
 
+  onPlotClick(data) {
+    if (data.points) {
+      this.setState({
+        selected: {
+          date: data.points[0].x,
+          temp: data.points[0].y
+        }
+      });
+    }
+  }
+
   ////////// Private Methods
   _renderForecastInfo(list) {
-    let currentTemp = 'not loaded yet';
+    let currentTemp      = 'not loaded yet';
+    const { temp, date } = this.state.selected;
 
     if (list) {
       currentTemp = list[0].main.temp;
@@ -71,8 +92,13 @@ class App extends Component {
       return (
         <div className="wrapper">
           <p className="temp-wrapper">
-            <span className="temp">{currentTemp}</span>
+            <span className="temp">
+              {temp ? temp : currentTemp}
+            </span>
             <span className="temp-symbol">°C</span>
+            <span className="temp-date">
+              {temp ? date : ''}
+            </span>
           </p>
 
           <h2>Forecast</h2>
@@ -80,6 +106,7 @@ class App extends Component {
           <Plot
             xData={this.state.dates}
             yData={this.state.temps}
+            onPlotClick={this.onPlotClick}
             type="scatter"
           />
         </div>

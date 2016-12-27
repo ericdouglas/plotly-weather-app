@@ -19,7 +19,7 @@ class Plot extends React.Component {
 
   ////////// Private Methods
   _drawPlot() {
-    const { xData, yData, type } = this.props;
+    const { xData, yData, type, onPlotClick } = this.props;
 
     Plotly
     .newPlot('plot', [{
@@ -38,6 +38,10 @@ class Plot extends React.Component {
     }, {
       displayModeBar: false
     });
+
+    document
+      .getElementById('plot')
+      .on('plotly_click', onPlotClick);
   }
 
   render() {
