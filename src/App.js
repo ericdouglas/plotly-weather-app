@@ -13,7 +13,7 @@ import Plot from './components/Plot';
 
 import './App.css';
 
-class App extends Component {
+export class App extends Component {
   constructor() {
     super();
 
